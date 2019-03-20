@@ -8,6 +8,7 @@ import com.ng.sparkmall.common.util.ConfigurationUtil
 import com.ng.sparkmall.offline.bean.Condition
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
+import com.ng.sparkmall.offline.app._
 
 object OfflineApp {
 
@@ -23,8 +24,10 @@ object OfflineApp {
     val taskId: String = UUID.randomUUID().toString
 
     //根据条件过滤取出需要的RDD，过滤条件定义在配置文件中
-    readUserVisitActionRDD(spark, readConditions)
+    val value: RDD[UserVisitAction] = readUserVisitActionRDD(spark, readConditions)
+    value.take(10).foreach(println)
 
+//    CategoryTop10App.statCategoryTop10(spark,value,taskId)
   }
 
   /**
