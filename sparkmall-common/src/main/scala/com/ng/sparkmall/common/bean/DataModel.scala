@@ -1,4 +1,4 @@
-package bean
+package com.ng.sparkmall.common.bean
 
 object DataModel {
 }

@@ -1,4 +1,4 @@
-package util
+package com.ng.sparkmall.common.util
 
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder
 import org.apache.commons.configuration2.builder.fluent.Parameters
