@@ -5,7 +5,7 @@ import java.util.Date
 object RandomDate {
   def apply(startDate: Date, stopDate: Date, step: Int) = {
     val randomDate = new RandomDate
-    val avgStepTime = (stopDate.getTime - stopDate.getTime) / step
+    val avgStepTime = (stopDate.getTime - startDate.getTime) / step
     randomDate.maxStepTime = 4 * avgStepTime
     randomDate.lastDateTIme = startDate.getTime
     randomDate

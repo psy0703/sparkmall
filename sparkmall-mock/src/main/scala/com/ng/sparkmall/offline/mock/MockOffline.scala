@@ -1,4 +1,4 @@
-package com.ng.sparkmall.mock
+package com.ng.sparkmall.offline.mock
 
 import java.text.SimpleDateFormat
 import java.util.UUID
@@ -27,7 +27,7 @@ object MockOffline {
 
   // --- 商品相关参数 开始 ---
   //品类数量
-  val cargoryNum = 20
+  val categoryNum = 20
   // 商品数量
   val productNum = 100
   // --- 商品相关参数 结束 ---
@@ -152,16 +152,16 @@ object MockOffline {
           action match {
             case "search" => searchKeyword = searchKeywordsOpts.getRandomOption()
             case "click" => {
-              clickCategoryId = RandomNumUtil.randomInt(1, cargoryNum)
+              clickCategoryId = RandomNumUtil.randomInt(1, categoryNum)
               clickProductId = RandomNumUtil.randomInt(1, productNum)
             }
             case "order" => {
-              orderCategoryIds = RandomNumUtil.randomMultiInt(1, cargoryNum, RandomNumUtil.randomInt(1, 5), false).mkString(",")
-              orderProductIds = RandomNumUtil.randomMultiInt(1, productNum, RandomNumUtil.randomInt(1, 3), false).mkString(",")
+              orderCategoryIds = RandomNumUtil.randomMultiInt(1, categoryNum, RandomNumUtil.randomInt(1, 5), false).mkString(",")
+              orderProductIds = RandomNumUtil.randomMultiInt(1, productNum, RandomNumUtil.randomInt(1, 5), false).mkString(",")
             }
             case "pay" => {
-              payCategoryIds = RandomNumUtil.randomMultiInt(1, cargoryNum, RandomNumUtil.randomInt(1, 5), false).mkString(",")
-              payProductIds = RandomNumUtil.randomMultiInt(1, productNum, RandomNumUtil.randomInt(1, 3), false).mkString(",")
+              payCategoryIds = RandomNumUtil.randomMultiInt(1, categoryNum, RandomNumUtil.randomInt(1, 5), false).mkString(",")
+              payProductIds = RandomNumUtil.randomMultiInt(1, productNum, RandomNumUtil.randomInt(1, 5), false).mkString(",")
             }
           }
           rows += UserVisitAction(actionDateString,
@@ -184,6 +184,8 @@ object MockOffline {
   }
 
   def main(args: Array[String]): Unit = {
+    //设置HDFS文件系统访问用户名
+    System.setProperty("HADOOP_USER_NAME","psy831")
     // 模拟数据
     val userVisitActionData = mockUserVisitAction
     val userInfoData = mockUserInfo
@@ -192,10 +194,10 @@ object MockOffline {
 
     val spark: SparkSession = SparkSession
       .builder()
-      .master("local[1]")
+      .master("local[*]")
       .appName("MockOffline")
       .enableHiveSupport()
-      .config("spark.sql.warehouse.dir", "hdfs://hadoop201:9000/user/hive/warehouse")
+      .config("spark.sql.warehouse.dir", "hdfs://hadoop102:9000/user/hive/warehouse")
       .getOrCreate()
     import spark.implicits._
     val sc = spark.sparkContext

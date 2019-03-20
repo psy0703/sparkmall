@@ -56,6 +56,7 @@ case class ProductInfo(product_id: Long,
   * @param order_product_ids  一次订单中所有商品的ID集合
   * @param pay_category_ids   一次支付中所有品类的ID集合
   * @param pay_product_ids    一次支付中所有商品的ID集合
+  * @param city_id            城市id
   */
 case class UserVisitAction(date: String,
                            user_id: Long,
