@@ -5,10 +5,10 @@ import java.util.UUID
 import com.alibaba.fastjson.JSON
 import com.ng.sparkmall.common.bean.UserVisitAction
 import com.ng.sparkmall.common.util.ConfigurationUtil
-import com.ng.sparkmall.offline.bean.Condition
+import com.ng.sparkmall.offline.app._
+import com.ng.sparkmall.offline.bean.{CategoryCountInfo, Condition}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
-import com.ng.sparkmall.offline.app._
 
 object OfflineApp {
 
@@ -24,10 +24,20 @@ object OfflineApp {
     val taskId: String = UUID.randomUUID().toString
 
     //根据条件过滤取出需要的RDD，过滤条件定义在配置文件中
-    val value: RDD[UserVisitAction] = readUserVisitActionRDD(spark, readConditions)
-    value.take(10).foreach(println)
+    val userVisitActionRDD: RDD[UserVisitAction] = readUserVisitActionRDD(spark, readConditions)
+    //做缓存
+    userVisitActionRDD.cache()
+//    userVisitActionRDD.take(10).foreach(println)
 
-//    CategoryTop10App.statCategoryTop10(spark,value,taskId)
+    println("任务1: 开始")
+    val categorytop10: List[CategoryCountInfo] = CategoryTop10App.statCategoryTop10(spark,userVisitActionRDD,taskId)
+    println("任务1: 结束")
+
+    println("---------------------")
+
+    println("任务2：开始")
+    CategorySessionApp.statCategoryTop10Seesion(spark,categorytop10,userVisitActionRDD,taskId)
+    println("任务2：结束")
   }
 
   /**

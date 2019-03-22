@@ -11,30 +11,26 @@ import scala.collection.mutable
  */
 class MapAccumulator extends  AccumulatorV2[(String,String),mutable.Map[(String,String),Long]]{
 
-  private val map: mutable.Map[(String, String), Long] = mutable.Map[(String,String),Long]()
+  private val map: mutable.Map[(String, String), Long] = mutable.Map[((String, String)), Long]()
 
   // 是否为空
-  override def isZero: Boolean = {
-    map.isEmpty
-  }
+  override def isZero: Boolean = map.isEmpty
 
-  //copy数据到executor
+  // copy数据
   override def copy(): AccumulatorV2[(String, String), mutable.Map[(String, String), Long]] = {
     val newAcc = new MapAccumulator
-    map.synchronized{
+    map.synchronized {
       newAcc.map ++= map
     }
     newAcc
   }
 
-  //重置
-  override def reset(): Unit = {
-    map.clear()
-  }
+  // 重置
+  override def reset(): Unit = map.clear()
 
-  //累加   (品类1, "click")
+  // 累加   (品类1, "click")
   override def add(v: (String, String)): Unit = {
-    map(v) = map.getOrElse(v,0L) + 1L
+    map(v) = map.getOrElse(v, 0L) + 1L
   }
 
   // 合并
@@ -42,13 +38,17 @@ class MapAccumulator extends  AccumulatorV2[(String,String),mutable.Map[(String,
   //  other.map   (商品1, "click") -> 200
   //  (商品1, "order") -> 200
   override def merge(other: AccumulatorV2[(String, String), mutable.Map[(String, String), Long]]): Unit = {
-    other.value.foreach{
-      case (k,count) => {
-        map.put(k ,map.getOrElse(k, 0L) + count)
+    other.value.foreach {
+      case (k, count) => {
+        map.put(k, map.getOrElse(k, 0L) + count)
       }
     }
+    /*other.value.foreach(kv => {
+        map.put(kv._1, map.getOrElse(kv._1, 0L) + kv._2)
+    })*/
+
   }
 
-  //最终的返回值
+  // 最终的返回值
   override def value: mutable.Map[(String, String), Long] = map
 }

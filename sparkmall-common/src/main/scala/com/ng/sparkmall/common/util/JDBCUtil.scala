@@ -1,6 +1,6 @@
 package com.ng.sparkmall.common.util
 
-import java.sql.{Connection, PreparedStatement}
+import java.sql.PreparedStatement
 import java.util.Properties
 
 import com.alibaba.druid.pool.DruidDataSourceFactory
@@ -44,19 +44,19 @@ object JDBCUtil {
   /**
     * 执行批处理
     */
-  def executeBatchUpdate(sql:String,argsList:Iterable[Array[Any]]): Unit ={
-    val conn: Connection = dataSource.getConnection
+  def executeBatchUpdate(sql: String, argsList: Iterable[Array[Any]]) = {
+    val conn = dataSource.getConnection
     conn.setAutoCommit(false)
-    val ps: PreparedStatement = conn.prepareStatement(sql)
-    argsList.foreach{
-      case args:Array[Any] => {
-        ( 0 until args.length).foreach{
+    val ps = conn.prepareStatement(sql)
+    argsList.foreach {
+      case args: Array[Any] => {
+        (0 until args.length).foreach {
           i => ps.setObject(i + 1, args(i))
         }
         ps.addBatch()
       }
     }
-    ps.executeUpdate()
+    ps.executeBatch()
     conn.commit()
   }
 
