@@ -27,17 +27,21 @@ object OfflineApp {
     val userVisitActionRDD: RDD[UserVisitAction] = readUserVisitActionRDD(spark, readConditions)
     //做缓存
     userVisitActionRDD.cache()
-//    userVisitActionRDD.take(10).foreach(println)
+    //    userVisitActionRDD.take(10).foreach(println)
 
     println("任务1: 开始")
-    val categorytop10: List[CategoryCountInfo] = CategoryTop10App.statCategoryTop10(spark,userVisitActionRDD,taskId)
+    val categorytop10: List[CategoryCountInfo] = CategoryTop10App.statCategoryTop10(spark, userVisitActionRDD, taskId)
     println("任务1: 结束")
 
     println("---------------------")
 
     println("任务2：开始")
-    CategorySessionApp.statCategoryTop10Seesion(spark,categorytop10,userVisitActionRDD,taskId)
+    CategorySessionApp.statCategoryTop10Seesion(spark, categorytop10, userVisitActionRDD, taskId)
     println("任务2：结束")
+
+    println("任务3：开始")
+    PageConversionApp.calcPageConversion(spark,userVisitActionRDD,readConditions.targetPageFlow,taskId)
+    println("任务3：结束")
   }
 
   /**
@@ -62,16 +66,16 @@ object OfflineApp {
     */
   def readUserVisitActionRDD(spark: SparkSession, condition: Condition): RDD[UserVisitAction] = {
     var sql = s"select v.* from user_visit_action v join user_info u on v.user_id = u.user_id where 1=1"
-    if(isNotEmpty(condition.startDate)){
+    if (isNotEmpty(condition.startDate)) {
       sql += s" and v.date >= '${condition.startDate}'"
     }
-    if(isNotEmpty(condition.endDate)){
+    if (isNotEmpty(condition.endDate)) {
       sql += s" and v.date <= '${condition.endDate}' "
     }
-    if (condition.startAge != 0){
+    if (condition.startAge != 0) {
       sql += s" and u.age >= '${condition.startAge}' "
     }
-    if (condition.endAge != 0 ){
+    if (condition.endAge != 0) {
       sql += s" and u.age <= '${condition.endAge}' "
     }
 

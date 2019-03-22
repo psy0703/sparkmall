@@ -9,7 +9,7 @@ import org.apache.spark.sql.SparkSession
 
 object CategorySessionApp {
 
-  def statCategoryTop10Seesion(spark:SparkSession,categoryTop10:List[CategoryCountInfo],userVisitAction: RDD[UserVisitAction],taskId:String): Unit ={
+  def statCategoryTop10Seesion(spark: SparkSession, categoryTop10: List[CategoryCountInfo], userVisitAction: RDD[UserVisitAction], taskId: String): Unit = {
     //1、过滤掉userVisitAction中category 不再前10 的日志
     //1.1 得到top10 的categoryId
     val categoryIdTop10: List[String] = categoryTop10.map(_.categoryId)
@@ -42,12 +42,12 @@ object CategorySessionApp {
       }
     }
 
-    //6、写入到mysql数据库
+    //6、写入到mysql数据库   数据量已经很小了，可以把数据拉到Driver，然后再写入
     val categorySessionArr: Array[Array[Any]] = sortedCategorySessioin.collect.map(
       item => Array(item.taskId, item.categoryId, item.sessionId, item.clickCount)
     )
-    JDBCUtil.executeUpdate("truncate sparkmall.category_top10_session_count",null)
-    JDBCUtil.executeBatchUpdate("insert into sparkmall.category_top10_session_count values(?,?,?,?)",categorySessionArr)
+    JDBCUtil.executeUpdate("truncate table sparkmall.category_top10_session_count", null)
+    JDBCUtil.executeBatchUpdate("insert into sparkmall.category_top10_session_count values(?,?,?,?)", categorySessionArr)
   }
 
 }

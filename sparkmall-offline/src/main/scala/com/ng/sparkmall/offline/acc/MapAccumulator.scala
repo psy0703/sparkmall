@@ -9,7 +9,7 @@ import scala.collection.mutable
 输出:
     Map[(品类1, "click"), 100]
  */
-class MapAccumulator extends  AccumulatorV2[(String,String),mutable.Map[(String,String),Long]]{
+class MapAccumulator extends AccumulatorV2[(String, String), mutable.Map[(String, String), Long]] {
 
   private val map: mutable.Map[(String, String), Long] = mutable.Map[((String, String)), Long]()
 

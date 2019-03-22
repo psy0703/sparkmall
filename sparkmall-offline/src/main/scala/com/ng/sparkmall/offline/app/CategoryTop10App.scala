@@ -29,7 +29,7 @@ import scala.collection.mutable
 object CategoryTop10App {
 
   //统计热门品类的Top10
-  def statCategoryTop10(spark:SparkSession,userVisitActionRDD: RDD[UserVisitAction], taskId : String) ={
+  def statCategoryTop10(spark: SparkSession, userVisitActionRDD: RDD[UserVisitAction], taskId: String) = {
     // 1. 注册累加器
     val acc = new MapAccumulator
     spark.sparkContext.register(acc, "MapAccumulator")
