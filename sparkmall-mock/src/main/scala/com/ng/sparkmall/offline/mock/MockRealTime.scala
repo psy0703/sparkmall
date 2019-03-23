@@ -4,7 +4,7 @@ import java.util.Properties
 
 import com.ng.sparkmall.common.bean.CityInfo
 import com.ng.sparkmall.mock.util.{RandomNumUtil, RandomOptions}
-import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -67,6 +67,15 @@ object MockRealTime {
 
   def main(args: Array[String]): Unit = {
     val topic = "ads_log"
-
+    val producer: KafkaProducer[String, String] = createKafkaProducer
+    while(true){
+      mockRealTimeData().foreach{
+        msg => {
+          producer.send(new ProducerRecord(topic,msg))
+          Thread.sleep(100)
+        }
+      }
+      Thread.sleep(1000)
+    }
   }
 }
