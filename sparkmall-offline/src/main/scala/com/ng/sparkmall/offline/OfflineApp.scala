@@ -6,7 +6,7 @@ import com.alibaba.fastjson.JSON
 import com.ng.sparkmall.common.bean.UserVisitAction
 import com.ng.sparkmall.common.util.ConfigurationUtil
 import com.ng.sparkmall.offline.app._
-import com.ng.sparkmall.offline.bean.{CategoryCountInfo, Condition}
+import com.ng.sparkmall.offline.bean.Condition
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 
@@ -30,18 +30,21 @@ object OfflineApp {
     //    userVisitActionRDD.take(10).foreach(println)
 
     println("任务1: 开始")
-    val categorytop10: List[CategoryCountInfo] = CategoryTop10App.statCategoryTop10(spark, userVisitActionRDD, taskId)
+//    val categorytop10: List[CategoryCountInfo] = CategoryTop10App.statCategoryTop10(spark, userVisitActionRDD, taskId)
     println("任务1: 结束")
 
     println("---------------------")
 
     println("任务2：开始")
-    CategorySessionApp.statCategoryTop10Seesion(spark, categorytop10, userVisitActionRDD, taskId)
+//    CategorySessionApp.statCategoryTop10Seesion(spark, categorytop10, userVisitActionRDD, taskId)
     println("任务2：结束")
 
     println("任务3：开始")
-    PageConversionApp.calcPageConversion(spark,userVisitActionRDD,readConditions.targetPageFlow,taskId)
+//    PageConversionApp.calcPageConversion(spark,userVisitActionRDD,readConditions.targetPageFlow,taskId)
     println("任务3：结束")
+
+    println("任务4：开始")
+    AreaClickTop3App.statAreaClickTop3Product(spark)
   }
 
   /**

@@ -3,7 +3,7 @@ package com.ng.sparkmall.offline.app
 import java.util.Properties
 
 import com.ng.sparkmall.common.util.ConfigurationUtil
-import org.apache.spark.sql.{SaveMode, SparkSession}
+import org.apache.spark.sql.SparkSession
 
 /**
   * 需求4: 各区域热门商品 Top3
@@ -11,13 +11,20 @@ import org.apache.spark.sql.{SaveMode, SparkSession}
   */
 object AreaClickTop3App {
 
-  def statAreaClickTop3Product(spark:SparkSession): Unit ={
+  def statAreaClickTop3Product(spark: SparkSession): Unit = {
+    // 注册 UDAF 函数
+    spark.udf.register("city_remark", CityClickCountUDAF)
 
     // 1. 查询出来所有的点击记录, 并与 city_info 表连接, 得到每个城市所在的地区
+    spark.sql("use sparkmall")
     spark.sql(
       """
         |select
-        |c.area,c.city_id,u.click_product_id,u.click_category_id
+        |c.area,
+        |c.city_id,
+        |c.city_name,
+        |u.click_product_id,
+        |u.click_category_id
         |from city_info c
         |join user_visit_action u
         |on c.city_id = u.city_id
@@ -29,7 +36,8 @@ object AreaClickTop3App {
       """
         |select
         |t1.area , t1.click_product_id,
-        |count(*) counts
+        |count(*) click_count,
+        |city_remark(t1.city_name) remark
         |from t1
         |group by t1.area , t1.click_product_id
       """.stripMargin).createOrReplaceTempView("t2")
@@ -39,7 +47,7 @@ object AreaClickTop3App {
       """
         |select
         |t2.*,
-        |rank() over(partition by t2.area order by t2.counts desc) ranks
+        |rank() over(partition by t2.area order by t2.click_count desc) ranks
         |from t2
       """.stripMargin).createOrReplaceTempView("t3")
 
@@ -47,18 +55,22 @@ object AreaClickTop3App {
     //4、只取前三名. 并把结果保存在数据库中
     val conf = ConfigurationUtil("config.properties")
     val props = new Properties()
-    props.setProperty("user",conf.getString("jdbc.user"))
-    props.setProperty("password",conf.getString("jdbc.password"))
+    props.setProperty("user", conf.getString("jdbc.user"))
+    props.setProperty("password", conf.getString("jdbc.password"))
 
     spark.sql(
       """
-        |select *
+        |select
+        |t3.area,
+        |t3.click_count,
+        |t3.remark,
+        |t3.ranks
         |from t3
         |where t3.ranks <=3
-      """.stripMargin)
-      .write
-      .mode(SaveMode.Overwrite)
-      .jdbc(conf.getString("jdbc.url"),"area_click_top10",props)
+      """.stripMargin).show()
+//      .write
+//      .mode(SaveMode.Overwrite)
+//      .jdbc(conf.getString("jdbc.url"), "area_click_top10", props)
   }
 
 }
